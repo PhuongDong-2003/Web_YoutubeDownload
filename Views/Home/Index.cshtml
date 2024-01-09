@@ -1,0 +1,66 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+    var results = ViewData["listresult"];
+}
+
+<div class="text-center">
+    <img src="/img/header.png" alt="Icon" class="">
+
+    <h3>Youtube Video Downloader</h3>
+    <hr>
+
+</div>
+
+<div class="main">
+
+    <form class="form-inline" asp-controller="Home" asp-action="Find" method="post">
+        <div class="form-group mx-sm-3 mb-2">
+            <label for="inputPassword2" class="sr-only">Search</label>
+            <input type="text" class="form-control" id="keyword" placeholder="Search" name="keyword">
+        </div>
+        <button type="submit" class="btn btn-primary mb-2">Search</button>
+    </form>
+    <br>
+    <div class="card">
+        <div class="card-header">
+            List Video Youtube Dowload
+        </div>
+        @if (ViewBag.listresult != null)
+        {
+  
+            <table class="table table-striped pb-50px" class="">
+                <thead>
+                    <tr>
+                        <th scope="col">Title</th>
+                        <th scope="col">YoutubeDownload</th>
+
+                    </tr>
+                </thead>
+
+               @for (int i = 0; i < ViewBag.listresult.Count && i < 10; i++)
+                {
+                  
+                    @if (i > 10)
+                    {
+                        break;
+                    }
+                    <tbody>
+                        <tr>
+                            <th scope="row">@ViewBag.listresult[i].Title</th>
+                            <td>
+                    <form method="post" asp-controller="Home" asp-action="Download">
+                        <input type="hidden" name="selectedVideoIndex" value="@i" />
+                        <button type="submit" class="btn btn-primary mb-2">Download</button>
+                    </form>
+                            </td>
+
+                        </tr>
+                    </tbody>
+
+                }
+            </table>
+        }
+
+
+    </div>
+</div>
