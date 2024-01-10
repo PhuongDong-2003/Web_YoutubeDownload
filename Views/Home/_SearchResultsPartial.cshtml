@@ -1,0 +1,35 @@
+
+    <div class="card">
+        <div class="card-header">
+            List Video Youtube Dowload
+        </div>
+        @if (ViewBag.listresult != null)
+        {
+            <table class="table table-striped pb-50px">
+                <thead>
+                    <tr>
+                        <th scope="col">Title</th>
+                        <th scope="col">YoutubeDownload</th>
+                    </tr>
+                </thead>
+
+                @for (int i = 0; i < ViewBag.listresult.Count && i < 10; i++)
+                {
+                    if(i>10)
+                    {
+                        break;
+                    }
+                    <tbody>
+                        <tr>
+                            <th scope="row">@ViewBag.listresult[i].Title</th>
+                            <td>
+                                <button type="button" class="btn btn-primary mb-2"
+                                    onclick="downloadVideo('@ViewBag.listresult[i].Url')">Download</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                }
+            </table>
+        }
+
+    </div>

@@ -1,25 +1,28 @@
 ﻿using System.Diagnostics;
+using System.Net.Http.Headers;
 using System.Text.Json;
 using DownloadYoutube.Service;
 using Microsoft.AspNetCore.Mvc;
 using YoutubeDownload.Models;
 using YoutubeExplode;
 using YoutubeExplode.Search;
+using YoutubeExplode.Videos.Streams;
 
 namespace YoutubeDownload.Controllers;
 
 public class HomeController : Controller
 {
+
     private readonly FindService _findService;
     private readonly DownLoadYoutubeService _downLoadYoutubeService;
-    private readonly UserChoosesService _userChoosesService;
+
     private readonly ILogger<HomeController> _logger;
 
-    public HomeController(ILogger<HomeController> logger, FindService findService, DownLoadYoutubeService downLoadYoutubeService, UserChoosesService userChoosesService)
+    public HomeController(ILogger<HomeController> logger, FindService findService, DownLoadYoutubeService downLoadYoutubeService)
     {
         _findService = findService;
         _downLoadYoutubeService = downLoadYoutubeService;
-        _userChoosesService = userChoosesService;
+
         _logger = logger;
     }
 
@@ -37,27 +40,77 @@ public class HomeController : Controller
         return View("Index");
     }
 
-    public async Task<IActionResult> Download(int selectedVideoIndex)
+    public async Task<FileResult> Download(string link)
     {
 
-        var youtube = new YoutubeClient();
-
-        if (selectedVideoIndex >= 0)
+        if (link is not null)
         {
-            var video = await _userChoosesService.LoadChooses(searchResults, selectedVideoIndex);
 
-            if (video is not null)
-            {
-                await _downLoadYoutubeService.DownloadVideoAsync(youtube, video);
-                return View("Index");
-            }
-
+            return await _downLoadYoutubeService.Download(link);
         }
-
-        return RedirectToAction("Error");
+        return null;
 
     }
 
+    [HttpPost]
+    public async Task<PartialViewResult> FindJS(string keyword)
+    {
+        if (keyword is not null)
+        {
+            var results = await _findService.Find(keyword);
+            ViewBag.listresult = results;
+            return PartialView("_SearchResultsPartial");
+        }
+
+        return null;
+    }
+
+    [HttpPost]
+    public async Task<JsonResult> DownloadJs(string link)
+    {
+        if (link is not null)
+        {
+            var fileResult = await _downLoadYoutubeService.Download(link);
+            return Json(new { success = fileResult != null, fileResult });
+        }
+        return Json(new { success = false });
+    }
+
+    public async Task<IActionResult> Download2(string youtubeLink)
+    {
+        string link = "https://www.youtube.com/watch?v=e2Xx7WcvEns&list=RDGMEMQ1dJ7wXfLlqCjwV0xfSNbAVMR_zMKRuQbM0&index=5";
+        try
+        {
+            var youtube = new YoutubeClient();
+            var videoInfo = await youtube.Videos.GetAsync(link);
+            var streamInfoSet = await youtube.Videos.Streams.GetManifestAsync(videoInfo.Id);
+            var streamInfo = streamInfoSet.GetMuxedStreams().GetWithHighestVideoQuality();
+
+            if (streamInfo != null)
+            {
+                var ms = new MemoryStream();
+
+                await youtube.Videos.Streams.CopyToAsync(streamInfo, ms);
+                ms.Position = 0;
+
+                var fileType = streamInfo.Container;
+
+                var cd = new ContentDispositionHeaderValue("attachment")
+                {
+                    FileName = $"{videoInfo.Title}.{fileType}"
+                };
+                Response.Headers.Add("Content-Disposition", cd.ToString());
+
+                return File(ms, $"video/{fileType}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error downloading video: {ex.Message}");
+        }
+
+        return RedirectToAction("Error");
+    }
     public IActionResult Privacy()
     {
         return View();

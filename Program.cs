@@ -6,7 +6,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 builder.Services.AddScoped<DownLoadYoutubeService>();
 builder.Services.AddScoped<FindService>();
-builder.Services.AddScoped<UserChoosesService>();
+
 
 var app = builder.Build();
 
