@@ -65,52 +65,18 @@ public class HomeController : Controller
         return null;
     }
 
-    [HttpPost]
-    public async Task<JsonResult> DownloadJs(string link)
+    [HttpGet]
+    public async Task<ActionResult> DownloadJs([FromQuery] string link)
     {
-        if (link is not null)
-        {
-            var fileResult = await _downLoadYoutubeService.Download(link);
-            return Json(new { success = fileResult != null, fileResult });
-        }
-        return Json(new { success = false });
-    }
 
-    public async Task<IActionResult> Download2(string youtubeLink)
-    {
-        string link = "https://www.youtube.com/watch?v=e2Xx7WcvEns&list=RDGMEMQ1dJ7wXfLlqCjwV0xfSNbAVMR_zMKRuQbM0&index=5";
-        try
-        {
-            var youtube = new YoutubeClient();
-            var videoInfo = await youtube.Videos.GetAsync(link);
-            var streamInfoSet = await youtube.Videos.Streams.GetManifestAsync(videoInfo.Id);
-            var streamInfo = streamInfoSet.GetMuxedStreams().GetWithHighestVideoQuality();
-
-            if (streamInfo != null)
-            {
-                var ms = new MemoryStream();
-
-                await youtube.Videos.Streams.CopyToAsync(streamInfo, ms);
-                ms.Position = 0;
-
-                var fileType = streamInfo.Container;
-
-                var cd = new ContentDispositionHeaderValue("attachment")
-                {
-                    FileName = $"{videoInfo.Title}.{fileType}"
-                };
-                Response.Headers.Add("Content-Disposition", cd.ToString());
-
-                return File(ms, $"video/{fileType}");
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error downloading video: {ex.Message}");
-        }
+       if(link is not null)
+       {
+        return await _downLoadYoutubeService.Download(link);
+       }
 
         return RedirectToAction("Error");
     }
+
     public IActionResult Privacy()
     {
         return View();

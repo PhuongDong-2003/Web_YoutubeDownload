@@ -17,7 +17,18 @@ namespace DownloadYoutube.Service
             if (keyword is not null)
             {
                 var youtube = new YoutubeClient();
-                return (await youtube.Search.GetVideosAsync(keyword)).ToList();
+                var searchResults = new List<VideoSearchResult>();
+
+                
+                await foreach (var result in youtube.Search.GetVideosAsync(keyword))
+                {
+                    searchResults.Add(result);
+
+                    if (searchResults.Count >= 5)
+                        break; 
+                }
+
+                return searchResults;
             }
             return null;
 
