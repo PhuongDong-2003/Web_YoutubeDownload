@@ -1,4 +1,8 @@
+using Auth0.AspNetCore.Authentication;
 using DownloadYoutube.Service;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using YoutubeDownload.Support;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -6,6 +10,18 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 builder.Services.AddScoped<DownLoadYoutubeService>();
 builder.Services.AddScoped<FindService>();
+
+builder.Services.AddAuth0WebAppAuthentication(options =>
+{
+   
+    options.Domain = builder.Configuration["Auth0:Domain"];
+    options.ClientId = builder.Configuration["Auth0:ClientId"];
+    // options.CallbackPath = "/Account/callback";
+    
+});
+
+// Configure the HTTP request pipeline.
+builder.Services.ConfigureSameSiteNoneCookies();
 
 
 var app = builder.Build();
@@ -23,6 +39,7 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllerRoute(

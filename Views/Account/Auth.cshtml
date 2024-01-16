@@ -1,0 +1,46 @@
+@using YoutubeDownload.Authentication
+@model Users
+@{
+    ViewData["Title"] = "Login";
+}
+            <div class="tab-content d-flex justify-content-center">
+               
+    <div class="tab-pane fade show active" id="pills-login" role="tabpanel" aria-labelledby="tab-login">
+         <h2>Login</h2>
+                <br>
+        <form asp-controller="Login" asp-action="Login">
+
+            <!-- Email input -->
+            <div data-mdb-input-init class="form-outline mb-6">
+                <input type="email" id="loginName" class="form-control" asp-for="Username"/>
+                <label class="form-label" for="loginName">Email or username</label>
+            </div>
+
+            <!-- Password input -->
+            <div data-mdb-input-init class="form-outline mb-6">
+                <input type="password" id="loginPassword" class="form-control"asp-for="Password"/>
+                <label class="form-label" for="loginPassword">Password</label>
+            </div>
+
+            <!-- 2 column grid layout -->
+            <div class="row mb-4">
+                <div class="col-md-8 d-flex justify-content-center">
+                    <!-- Checkbox -->
+                    <div class="form-check mb-3 mb-md-0">
+                        <input class="form-check-input" type="checkbox" value="" id="loginCheck" checked />
+                        <label class="form-check-label" for="loginCheck"> Remember me </label>
+                    </div>
+                </div>
+
+          
+            </div>
+
+            <!-- Submit button -->
+            <button type="submit" class="btn btn-primary btn-block mb-4">Sign in</button>
+
+        </form>
+    </div>
+</div>
+      
+
+<!-- Pills content -->

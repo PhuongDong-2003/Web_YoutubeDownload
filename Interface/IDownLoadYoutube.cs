@@ -11,5 +11,7 @@ namespace DownloadYoutube.Interface
     public interface IDownLoadYotube
     {
          public Task<FileResult> Download(string youtubeLink);
+
+         public Task<FileResult> DownloadAudio(string youtubeLink);
     }
 }

@@ -7,6 +7,8 @@ using DownloadYoutube.Interface;
 using YoutubeExplode;
 using YoutubeExplode.Search;
 using YoutubeExplode.Common;
+using System.ComponentModel;
+using YoutubeExplode.Videos.Streams;
 
 namespace DownloadYoutube.Service
 {
@@ -19,13 +21,13 @@ namespace DownloadYoutube.Service
                 var youtube = new YoutubeClient();
                 var searchResults = new List<VideoSearchResult>();
 
-                
+
                 await foreach (var result in youtube.Search.GetVideosAsync(keyword))
                 {
                     searchResults.Add(result);
 
-                    if (searchResults.Count >= 5)
-                        break; 
+                    if (searchResults.Count >= 6)
+                        break;
                 }
 
                 return searchResults;

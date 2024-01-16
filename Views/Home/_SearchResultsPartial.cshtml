@@ -1,35 +1,84 @@
+@* <div class="card">
+<div class="card-header">
+List Video Youtube Dowload
+</div>
+@if (ViewBag.listresult != null)
+{
+<table class="table table-striped pb-50px">
+<thead>
+<tr>
+<th scope="col">Title</th>
+<th scope="col">YoutubeDownload</th>
+</tr>
+</thead>
 
-    <div class="card">
-        <div class="card-header">
-            List Video Youtube Dowload
-        </div>
-        @if (ViewBag.listresult != null)
+@for (int i = 0; i < ViewBag.listresult.Count && i < 10; i++)
+{
+if (i > 10)
+{
+break;
+}
+<tbody>
+<tr>
+<th scope="row">@ViewBag.listresult[i].Title</th>
+<td>
+<button type="button" class="btn btn-primary mb-2"
+onclick="downloadVideo('@ViewBag.listresult[i].Url')">Download</button>
+</td>
+</tr>
+</tbody>
+}
+</table>
+}
+
+</div> *@
+
+
+@if (ViewBag.listresult != null)
+{
+
+    <div class=" row body d-flex  d-flex justify-content-around iphone " style=" margin:10px;">
+
+        @for (int i = 0; i < ViewBag.listresult.Count && i < 10; i++)
         {
-            <table class="table table-striped pb-50px">
-                <thead>
-                    <tr>
-                        <th scope="col">Title</th>
-                        <th scope="col">YoutubeDownload</th>
-                    </tr>
-                </thead>
-
-                @for (int i = 0; i < ViewBag.listresult.Count && i < 10; i++)
-                {
-                    if(i>10)
+            if (i > 10)
+            {
+                break;
+            }
+            <div class=" content col-md-3  text-center shadow-lg p-3 mb-5 rounded"
+                style=" margin:10px;  background-color: rgba( 173, 216, 230, 1);">
+                <div class="title d-flex justify-content-start text-white">
+                    <p>@ViewBag.listresult[i].Title</p>
+                </div>
+                <div class="card-bodyimg justify-content-center" style="height:139px; width:231px">
+                    @if (ViewBag.listresult[i].Thumbnails != null)
                     {
-                        break;
+                        <img class="img-thumbnail" src="@ViewBag.listresult[i].Thumbnails[0].Url" alt="Thumbnail">
                     }
-                    <tbody>
-                        <tr>
-                            <th scope="row">@ViewBag.listresult[i].Title</th>
-                            <td>
-                                <button type="button" class="btn btn-primary mb-2"
-                                    onclick="downloadVideo('@ViewBag.listresult[i].Url')">Download</button>
-                            </td>
-                        </tr>
-                    </tbody>
-                }
-            </table>
+                    else
+                    {
+                        <span>No Thumbnail</span>
+                    }
+
+                </div>
+
+                <br>
+                <div class="text-white">
+                    <span style="font-size: 15px;"> Thời lượng: @ViewBag.listresult[i].Duration</span> <br>
+                    <i class="bi bi-download"><button type="button" class="btn m-2 text-white"
+                            style="background-color: rgba( 244, 164, 96, 1);"
+                            onclick="downloadVideo('@ViewBag.listresult[i].Url')">Video</button></i>
+
+                    <i class="bi bi-download"><button type="button" class="btn m-2 text-white"
+                            style="background-color: rgba( 244, 164, 96, 1);"
+                            onclick="DownloadAudio('@ViewBag.listresult[i].Url')">Audio</button></i>
+
+                    <br>
+
+                </div>
+
+            </div>
         }
 
     </div>
+}

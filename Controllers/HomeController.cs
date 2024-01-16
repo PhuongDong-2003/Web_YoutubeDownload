@@ -15,14 +15,12 @@ public class HomeController : Controller
 
     private readonly FindService _findService;
     private readonly DownLoadYoutubeService _downLoadYoutubeService;
-
     private readonly ILogger<HomeController> _logger;
 
     public HomeController(ILogger<HomeController> logger, FindService findService, DownLoadYoutubeService downLoadYoutubeService)
     {
         _findService = findService;
         _downLoadYoutubeService = downLoadYoutubeService;
-
         _logger = logger;
     }
 
@@ -69,10 +67,22 @@ public class HomeController : Controller
     public async Task<ActionResult> DownloadJs([FromQuery] string link)
     {
 
-       if(link is not null)
-       {
-        return await _downLoadYoutubeService.Download(link);
-       }
+        if (link is not null)
+        {
+            return await _downLoadYoutubeService.Download(link);
+        }
+
+        return RedirectToAction("Error");
+    }
+
+    [HttpGet]
+    public async Task<ActionResult> DownloadAudio([FromQuery] string link)
+    {
+
+        if (link is not null)
+        {
+            return await _downLoadYoutubeService.DownloadAudio(link);
+        }
 
         return RedirectToAction("Error");
     }

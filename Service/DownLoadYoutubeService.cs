@@ -36,7 +36,7 @@ namespace DownloadYoutube.Service
                         FileName = $"{videoInfo.Title}.{fileType}"
                     };
 
-                   
+
                     return new FileContentResult(ms.ToArray(), $"video/{fileType}")
                     {
                         FileDownloadName = $"{videoInfo.Title}.{fileType}"
@@ -47,7 +47,43 @@ namespace DownloadYoutube.Service
             {
                 Console.WriteLine($"Error downloading video: {ex.Message}");
             }
-  
+
+            return null;
+        }
+
+        public async Task<FileResult> DownloadAudio(string youtubeLink)
+        {
+            try
+            {
+                var youtube = new YoutubeClient();
+                var videoInfo = await youtube.Videos.GetAsync(youtubeLink);
+                var streamInfoSet = await youtube.Videos.Streams.GetManifestAsync(videoInfo.Id);
+                var streamInfo = streamInfoSet.GetAudioOnlyStreams().GetWithHighestBitrate();
+
+                if (streamInfo != null)
+                {
+                    var ms = new MemoryStream();
+                    await youtube.Videos.Streams.CopyToAsync(streamInfo, ms);
+                    ms.Position = 0;
+
+                    var fileType = streamInfo.Container;
+
+                    var cd = new ContentDispositionHeaderValue("attachment")
+                    {
+                        FileName = $"{videoInfo.Title}.{fileType}"
+                    };
+
+                    return new FileContentResult(ms.ToArray(), $"video/{fileType}")
+                    {
+                        FileDownloadName = $"{videoInfo.Title}.{fileType}"
+                    };
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error downloading video: {ex.Message}");
+            }
+
             return null;
         }
     }
