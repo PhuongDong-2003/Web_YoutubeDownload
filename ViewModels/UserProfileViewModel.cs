@@ -12,5 +12,9 @@ namespace YoutubeDownload.ViewModels
         public string Name { get; set; }
 
         public string ProfileImage { get; set; }
+
+       
+
+  
     }
 }

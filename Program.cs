@@ -3,7 +3,6 @@ using DownloadYoutube.Service;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using YoutubeDownload.Support;
 
-
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -16,7 +15,8 @@ builder.Services.AddAuth0WebAppAuthentication(options =>
    
     options.Domain = builder.Configuration["Auth0:Domain"];
     options.ClientId = builder.Configuration["Auth0:ClientId"];
-    // options.CallbackPath = "/Account/callback";
+    options.CallbackPath = "/auth0/callback";
+    options.Scope = "openid profile email role";
     
 });
 
@@ -36,7 +36,7 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-
+app.UseCookiePolicy();
 app.UseRouting();
 
 app.UseAuthentication();

@@ -12,7 +12,6 @@ namespace YoutubeDownload.Controllers;
 
 public class HomeController : Controller
 {
-
     private readonly FindService _findService;
     private readonly DownLoadYoutubeService _downLoadYoutubeService;
     private readonly ILogger<HomeController> _logger;
@@ -63,17 +62,28 @@ public class HomeController : Controller
         return null;
     }
 
-    [HttpGet]
-    public async Task<ActionResult> DownloadJs([FromQuery] string link)
-    {
-
-        if (link is not null)
+        [HttpGet]
+        public async Task<ActionResult> DownloadJs([FromQuery] string link)
         {
-            return await _downLoadYoutubeService.Download(link);
-        }
+            var role = User.Claims.Where(c => c.Type == "https://my-app.example.com/roles")
+                                .Select(c => c.Value)
+                                .ToList();
 
-        return RedirectToAction("Error");
-    }
+            if (link is not null && role is not null)
+            {
+                if (role.Contains("customer"))
+                {
+                    return await _downLoadYoutubeService.Download(link);
+                }
+                else
+                {
+                    return BadRequest("You don't have permission to download");
+                }
+
+            }
+
+            return RedirectToAction("Error");
+        }
 
     [HttpGet]
     public async Task<ActionResult> DownloadAudio([FromQuery] string link)
@@ -98,3 +108,6 @@ public class HomeController : Controller
         return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
     }
 }
+
+
+

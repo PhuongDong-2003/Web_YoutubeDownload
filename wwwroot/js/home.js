@@ -6,54 +6,71 @@ function downloadVideo(link) {
         showCancelButton: true,
         confirmButtonText: 'Yes, download it!',
         cancelButtonText: 'Cancel',
-    }).then((result) => {
-        if (result.isConfirmed) {
+        allowOutsideClick: () => !Swal.isLoading(), 
+        preConfirm: () => {
             Swal.showLoading();
-
-            fetch('/Home/DownloadJs?link=' + encodeURIComponent(link), {
+            return fetch('/Home/DownloadJs?link=' + encodeURIComponent(link), {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-            }).then((data) => {
-                var blob = new Blob([data], { type: 'video/mp4' });
-                fetch('https://www.youtube.com/oembed?url=' + encodeURIComponent(link) + '&format=json')
-                    .then((response) => response.json())
-                    .then((videoData) => {
-                        var title = videoData.title;
-                        var filename = title + '.mp4';
-
-                        var downloadLink = document.createElement('a');
-                        downloadLink.href = window.URL.createObjectURL(blob);
-                        downloadLink.download = filename;
-
-                        document.body.appendChild(downloadLink);
-                        downloadLink.click();
-
-                        document.body.removeChild(downloadLink);
-
-                        // Close SweetAlert2 modal
-                        Swal.close();
-                    })
-                    .catch(() => {
-                        console.log('Failed to get video data');
-                        Swal.fire('Error', 'Failed to get video data', 'error');
-                        // Close SweetAlert2 modal in case of error
-                        Swal.close();
-                    });
             })
+                .then((response) => {
+
+                    if (response.status === 400) {
+                        Swal.fire({
+                            icon: "error",
+                            title: "Oops...",
+                            text: "You do not have permission to download!",
+                            timer: 2500,
+                        })
+
+                    } else {
+                        return response.blob();
+                    }
+
+                })
+                .then((blob) => {
+
+                    var title = "";
+                    return fetch('https://www.youtube.com/oembed?url=' + encodeURIComponent(link) + '&format=json')
+                        .then((response) => response.json())
+                        .then((videoData) => {
+                            title = videoData.title;
+                            var filename = title + '.mp4';
+
+                            var downloadLink = document.createElement('a');
+                            downloadLink.href = window.URL.createObjectURL(blob);
+                            downloadLink.download = filename;
+
+                            document.body.appendChild(downloadLink);
+                            downloadLink.click();
+
+                            document.body.removeChild(downloadLink);
+
+                            Swal.close();
+                        })
+                        .catch(() => {
+                            console.log('Failed to get video data');
+                            Swal.fire('Error', 'Failed to get video data', 'error');
+
+                            Swal.close();
+                        });
+                })
                 .catch(() => {
                     console.log('Failed to connect to server');
                     Swal.fire('Error', 'Failed to connect to server', 'error');
-                    // Close SweetAlert2 modal in case of error
+                   
                     Swal.close();
                 });
-        }
+        },
     });
 }
 
+
+
 function DownloadAudio(link) {
-  
+
     Swal.fire({
         title: 'Download Confirmation',
         text: 'Are you sure you want to download this Audio?',
@@ -61,20 +78,19 @@ function DownloadAudio(link) {
         showCancelButton: true,
         confirmButtonText: 'Yes, download it!',
         cancelButtonText: 'Cancel',
-    }).then((result) => {
-        if (result.isConfirmed) {
+        allowOutsideClick: () => !Swal.isLoading(), 
+        preConfirm: () => {
             Swal.showLoading();
-
-            fetch('/Home/DownloadAudio?link=' + encodeURIComponent(link), {
+            return fetch('/Home/DownloadJs?link=' + encodeURIComponent(link), {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-            }).then((data) => {
-                
-               
-                    var blob = new Blob([data], { type: 'Audio/mp4' });
+            })
+                .then((response) => response.blob())
+                .then((data) => {
 
+                    var blob = new Blob([data], { type: 'Audio/mp4' });
                     fetch('https://www.youtube.com/oembed?url=' + encodeURIComponent(link) + '&format=json')
                         .then((response) => response.json())
                         .then((audioData) => {
@@ -87,30 +103,57 @@ function DownloadAudio(link) {
 
                             document.body.appendChild(downloadLink);
                             downloadLink.click();
-
                             document.body.removeChild(downloadLink);
 
-                            // Close SweetAlert2 modal
+                          
                             Swal.close();
                         })
                         .catch(() => {
                             console.log('Failed to get audio data');
                             Swal.fire('Error', 'Failed to get audio data', 'error');
-                            // Close SweetAlert2 modal in case of error
+                            
                             Swal.close();
                         });
-            }).catch(() => {
-                console.log('Failed to connect to server');
-                Swal.fire('Error', 'Failed to connect to server', 'error');
-                // Close SweetAlert2 modal in case of error
-                Swal.close();
-            });    
-                
+                }).catch(() => {
+                    console.log('Failed to connect to server');
+                    Swal.fire('Error', 'Failed to connect to server', 'error');
+                    
+                    Swal.close();
+                });
         }
     });
 }
 
+var input = document.getElementById("keyword");
+var button = document.querySelector("#searchForm button");
 
+
+input.addEventListener("keydown", function (event) {
+    if (event.key === "Enter") {
+        searchVideos();
+    }
+});
+
+function searchVideos() {
+    var keyword = $('#keyword').val();
+    $.ajax({
+        url: '/Home/FindJs',
+        type: 'POST',
+        data: { keyword: keyword },
+        beforeSend: function () {
+            Swal.showLoading(); // Show loading indicator before the request is sent
+        },
+        success: function (data) {
+            $('#searchResults').html(data);
+        },
+        error: function () {
+            console.log('Failed to connect to server');
+            Swal.fire('Error', 'Failed to connect to server', 'error');
+        }
+    }).always(function () {
+        Swal.close(); // Close SweetAlert2 modal after the request is complete
+    });
+}
 
 
 // function DownloadAudio(link) {
@@ -194,36 +237,7 @@ function DownloadAudio(link) {
 
 // }
 
-var input = document.getElementById("keyword");
-var button = document.querySelector("#searchForm button");
 
-
-input.addEventListener("keydown", function (event) {
-    if (event.key === "Enter") {
-        searchVideos();
-    }
-});
-
-function searchVideos() {
-    var keyword = $('#keyword').val();
-    $.ajax({
-        url: '/Home/FindJs',
-        type: 'POST',
-        data: { keyword: keyword },
-        beforeSend: function () {
-            Swal.showLoading(); // Show loading indicator before the request is sent
-        },
-        success: function (data) {
-            $('#searchResults').html(data);
-        },
-        error: function () {
-            console.log('Failed to connect to server');
-            Swal.fire('Error', 'Failed to connect to server', 'error');
-        }
-    }).always(function () {
-        Swal.close(); // Close SweetAlert2 modal after the request is complete
-    });
-}
 
 
 

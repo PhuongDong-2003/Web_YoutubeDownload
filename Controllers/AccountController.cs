@@ -25,7 +25,7 @@ namespace YoutubeDownload.Controllers
         public async Task Logout()
         {
             var authenticationProperties = new LogoutAuthenticationPropertiesBuilder()
-           
+
                 .WithRedirectUri(Url.Action("Index", "Home"))
                 .Build();
 
@@ -40,43 +40,12 @@ namespace YoutubeDownload.Controllers
             {
                 Name = User.Identity.Name,
                 EmailAddress = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value,
-                ProfileImage = User.Claims.FirstOrDefault(c => c.Type == "picture")?.Value
+                ProfileImage = User.Claims.FirstOrDefault(c => c.Type == "picture")?.Value,
+
+
             });
         }
 
-        public IActionResult callback()
-        {
-            //Here we can retrieve the claims
-            // read external identity from the temporary cookie
-            //var authenticateResult = HttpContext.GetOwinContext().Authentication.AuthenticateAsync("ExternalCookie");
-            var result = HttpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-
-            if (result.Result?.Succeeded != true)
-            {
-                throw new Exception("External authentication error");
-            }
-
-            // retrieve claims of the external user
-            var externalUser = result.Result.Principal;
-            if (externalUser == null)
-            {
-                throw new Exception("External authentication error");
-            }
-
-            // retrieve claims of the external user
-            var claims = externalUser.Claims.ToList();
-
-            // try to determine the unique id of the external user - the most common claim type for that are the sub claim and the NameIdentifier
-            // depending on the external provider, some other claim type might be used
-            //var userIdClaim = claims.FirstOrDefault(x => x.Type == JwtClaimTypes.Subject);
-            var userIdClaim = claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier);
-            if (userIdClaim == null)
-            {
-                throw new Exception("Unknown userid");
-            }
-
-            return RedirectToAction("Index", "Home");
-        }
 
 
         /// <summary>

@@ -7,12 +7,12 @@
     {
        <a asp-controller="Account" asp-action="Profile">Hello @User.Identity.Name!</a>
        <a id="qsLogoutBtn" asp-controller="Account" asp-action="Logout">Logout</a>
+    
     }
     else
     {
       <a id="qsLoginBtn" asp-controller="Account" asp-action="Login">Login</a>
     }
-   
 </div>
 <div class="text-center">
 
@@ -41,7 +41,6 @@
     <br>
 
     <div id="searchResults">
-
     </div>
 
 
