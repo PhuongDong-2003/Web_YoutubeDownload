@@ -62,28 +62,50 @@ public class HomeController : Controller
         return null;
     }
 
-        [HttpGet]
-        public async Task<ActionResult> DownloadJs([FromQuery] string link)
+    [HttpGet]
+    public async Task<ActionResult> DownloadJs([FromQuery] string link)
+    {
+        var role = User.Claims.Where(c => c.Type == "https://my-app.example.com/roles")
+                            .Select(c => c.Value)
+                            .ToList();
+
+        if (link is not null && role is not null)
         {
-            var role = User.Claims.Where(c => c.Type == "https://my-app.example.com/roles")
-                                .Select(c => c.Value)
-                                .ToList();
-
-            if (link is not null && role is not null)
+            if (role.Contains("customer"))
             {
-                if (role.Contains("customer"))
+                try
                 {
-                    return await _downLoadYoutubeService.Download(link);
-                }
-                else
-                {
-                    return BadRequest("You don't have permission to download");
-                }
+                    var stopwatch = new Stopwatch();
+                    stopwatch.Start();
 
+                    var results = await _downLoadYoutubeService.Download(link);
+
+
+                    stopwatch.Stop();
+                    var elapsedTime = stopwatch.Elapsed;
+
+                
+
+
+                    return results;
+                }
+                catch (Exception ex)
+                {
+
+                    _logger.LogError(ex, "Error downloading video - User: {UserName}, VideoName: {VideoName}", User.Identity.Name, link);
+                    throw;
+                }
+            }
+            else
+            {
+                return BadRequest("You don't have permission to download");
             }
 
-            return RedirectToAction("Error");
+
         }
+
+        return RedirectToAction("Error");
+    }
 
     [HttpGet]
     public async Task<ActionResult> DownloadAudio([FromQuery] string link)
@@ -96,6 +118,8 @@ public class HomeController : Controller
 
         return RedirectToAction("Error");
     }
+
+
 
     public IActionResult Privacy()
     {

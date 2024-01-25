@@ -12,6 +12,7 @@ namespace YoutubeDownload.Controllers
 {
     public class AccountController : Controller
     {
+        
         public async Task Login(string returnUrl = "/")
         {
             var authenticationProperties = new LoginAuthenticationPropertiesBuilder()
@@ -41,7 +42,6 @@ namespace YoutubeDownload.Controllers
                 Name = User.Identity.Name,
                 EmailAddress = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value,
                 ProfileImage = User.Claims.FirstOrDefault(c => c.Type == "picture")?.Value,
-
 
             });
         }
