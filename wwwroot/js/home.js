@@ -34,6 +34,10 @@ function downloadVideo(link) {
                         const titleResponse = await fetch('https://www.youtube.com/oembed?url=' + encodeURIComponent(link) + '&format=json');
                         const videoData = await titleResponse.json();
                         const title = videoData.title;
+                        const time = videoData.duration;
+                        console.log(time);
+                        
+                        
                         download(blob,`${title}.mp4`, "video/mp4");
                         return;
                     }
@@ -90,45 +94,41 @@ function DownloadAudio(link) {
         allowOutsideClick: () => !Swal.isLoading(),
         preConfirm: () => {
             Swal.showLoading();
-            return fetch('/Home/DownloadJs?link=' + encodeURIComponent(link), {
+            return fetch('/Home/DownloadAudio?link=' + encodeURIComponent(link), {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
                 },
             })
-                .then((response) => response.blob())
-                .then((data) => {
+            .then(async (response) => {
 
-                    var blob = new Blob([data], { type: 'Audio/mp4' });
-                    fetch('https://www.youtube.com/oembed?url=' + encodeURIComponent(link) + '&format=json')
-                        .then((response) => response.json())
-                        .then((audioData) => {
-                            var title = audioData.title;
-                            var filename = title + '.mp4';
+                if (response.status === 400) {
+                    Swal.fire({
+                        icon: "error",
+                        title: "Oops...",
+                        text: "You do not have permission to download!",
+                        timer: 2500,
+                        allowOutsideClick: false,
+                    })
+                    throw 1;
+                } else {
+                    // download(response.blob(), "v.mp4", "video/mp4");
+                    // var file = window.URL.createObjectURL(blob);
+                    // window.location.assign(file);
+                    var blob = await response.blob();
+                    const titleResponse = await fetch('https://www.youtube.com/oembed?url=' + encodeURIComponent(link) + '&format=json');
+                    const videoData = await titleResponse.json();
+                    const title = videoData.title;
+                    const time = videoData.timer;
+                    console.log(time);
+                    
+                    
+                    download(blob,`${title}.mp4`, "audio/mp4");
+                    return;
+                }
 
-                            var downloadLink = document.createElement('a');
-                            downloadLink.href = window.URL.createObjectURL(blob);
-                            downloadLink.download = filename;
-
-                            document.body.appendChild(downloadLink);
-                            downloadLink.click();
-                            document.body.removeChild(downloadLink);
-
-
-                            Swal.close();
-                        })
-                        .catch(() => {
-                            console.log('Failed to get audio data');
-                            Swal.fire('Error', 'Failed to get audio data', 'error');
-
-                            Swal.close();
-                        });
-                }).catch(() => {
-                    console.log('Failed to connect to server');
-                    Swal.fire('Error', 'Failed to connect to server', 'error');
-
-                    Swal.close();
-                });
+            });
+               
         }
     });
 }

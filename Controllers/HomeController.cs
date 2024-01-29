@@ -79,12 +79,13 @@ public class HomeController : Controller
                     stopwatch.Start();
 
                     var results = await _downLoadYoutubeService.Download(link);
+                    
 
 
                     stopwatch.Stop();
                     var elapsedTime = stopwatch.Elapsed;
 
-                
+
 
 
                     return results;
@@ -110,13 +111,40 @@ public class HomeController : Controller
     [HttpGet]
     public async Task<ActionResult> DownloadAudio([FromQuery] string link)
     {
-
-        if (link is not null)
+        var role = User.Claims.Where(c => c.Type == "https://my-app.example.com/roles")
+                    .Select(c => c.Value)
+                    .ToList();
+        if (link is not null && role is not null)
         {
-            return await _downLoadYoutubeService.DownloadAudio(link);
-        }
+            if (role.Contains("customer"))
+            {
+                try
+                {
+                    var stopwatch = new Stopwatch();
+                    stopwatch.Start();
 
-        return RedirectToAction("Error");
+                    var results = await _downLoadYoutubeService.DownloadAudio(link); 
+                    
+                    stopwatch.Stop();
+                    var elapsedTime = stopwatch.Elapsed;
+
+                    return results;
+                }
+                catch (Exception ex)
+                {
+
+                    _logger.LogError(ex, "Error downloading video - User: {UserName}, VideoName: {VideoName}", User.Identity.Name, link);
+                    throw;
+                }
+            }
+            else
+            {
+                return BadRequest("You don't have permission to download");
+            }
+            
+        }
+         return RedirectToAction("Error");
+
     }
 
 

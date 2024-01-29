@@ -14,7 +14,6 @@ using YoutubeExplode.Videos.Streams;
 namespace DownloadYoutube.Service
 {
     public class DownLoadYoutubeService : IDownLoadYotube
-
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly ILogger<DownLoadYoutubeService> _logger;
@@ -23,8 +22,6 @@ namespace DownloadYoutube.Service
         {
             _httpContextAccessor = httpContextAccessor;
             _logger = logger;
-
-
         }
 
         public async Task<FileResult> Download(string youtubeLink)
@@ -36,34 +33,28 @@ namespace DownloadYoutube.Service
                 var videoInfo = await youtube.Videos.GetAsync(youtubeLink);
                 var streamInfoSet = await youtube.Videos.Streams.GetManifestAsync(videoInfo.Id);
                 var streamInfo = streamInfoSet.GetMuxedStreams().GetWithHighestVideoQuality();
+                var size = streamInfo.Size;
 
                 if (streamInfo != null)
                 {
+
                     var stopwatch = new Stopwatch();
                     stopwatch.Start();
                     var ms = new MemoryStream();
                     await youtube.Videos.Streams.CopyToAsync(streamInfo, ms);
                     ms.Position = 0;
-
                     var fileType = streamInfo.Container;
-                    long fileSize = ms.Length;
-
-                    double fileSizeInMB = (double)fileSize / (1024 * 1024);
-                    double roundedFileSizeInMB = Math.Round(fileSizeInMB, 2);
 
                     stopwatch.Stop();
                     var time = stopwatch.Elapsed;
-                
-                    using var scope = Serilog.Context.LogContext.PushProperty("Name", _httpContextAccessor.HttpContext.User.Identity.Name, true);
-                    _logger.LogInformation("Video downloaded - VideoName: {VideoName}, ElapsedTime: {ElapsedTime}s, File size: {Size} MB",
-                   videoInfo.Title, time, roundedFileSizeInMB );
+                    _logger.LogInformation("Video downloaded - VideoName: {VideoName}, ElapsedTime: {ElapsedTime}s, File size: {Size}",
+                   videoInfo.Title, time, size);
 
 
                     var cd = new ContentDispositionHeaderValue("attachment")
                     {
                         FileName = $"{videoInfo.Title}.{fileType}"
                     };
-
 
                     return new FileContentResult(ms.ToArray(), $"video/{fileType}")
                     {
@@ -87,15 +78,20 @@ namespace DownloadYoutube.Service
                 var videoInfo = await youtube.Videos.GetAsync(youtubeLink);
                 var streamInfoSet = await youtube.Videos.Streams.GetManifestAsync(videoInfo.Id);
                 var streamInfo = streamInfoSet.GetAudioOnlyStreams().GetWithHighestBitrate();
-
+                var size = streamInfo.Size;
                 if (streamInfo != null)
                 {
+                    var stopwatch = new Stopwatch();
+                    stopwatch.Start();
                     var ms = new MemoryStream();
                     await youtube.Videos.Streams.CopyToAsync(streamInfo, ms);
                     ms.Position = 0;
 
                     var fileType = streamInfo.Container;
-
+                    stopwatch.Stop();
+                    var time = stopwatch.Elapsed;
+                    _logger.LogInformation("Video downloaded - VideoName: {VideoName}, ElapsedTime: {ElapsedTime}s, File size: {Size}",
+                   videoInfo.Title, time, size);
                     var cd = new ContentDispositionHeaderValue("attachment")
                     {
                         FileName = $"{videoInfo.Title}.{fileType}"

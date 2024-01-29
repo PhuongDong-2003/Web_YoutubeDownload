@@ -19,7 +19,7 @@ Serilog.Log.Logger = new LoggerConfiguration()
         }
         return true;
     })
-    
+
     .WriteTo.Console(
         outputTemplate: "{Application} | {Timestamp:HH:mm:ss} | {Name} | {Level} | {SourceContext} | {Message:lj} {NewLine}{Exception}")
     .WriteTo.File(new CompactJsonFormatter(), "log.txt")
